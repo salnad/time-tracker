@@ -545,14 +545,14 @@
         const reflectionSkipBtn = document.getElementById('reflection-skip-btn');
         const productivityBtns = document.querySelectorAll('.productivity-btn');
 
-        let timerInterval = null;
-        let remainingSeconds = 0;
-        let isTimerRunning = false;
-        let completedSessions = [];
-        let currentSessionStart = null;
-        let defaultTimerSeconds = 25 * 60;
-        let isCalendarView = false;
-        let currentSessionData = null;
+        let questInterval = null;
+        let remainingHeartbeats = 0;
+        let isQuestActive = false;
+        let completedAdventures = [];
+        let currentAdventureBeginning = null;
+        let defaultQuestHeartbeats = 25 * 60;
+        let isChroniclesView = false;
+        let currentAdventureScroll = null;
 
         // Request notification permission on load
         if ('Notification' in window && Notification.permission === 'default') {
@@ -560,8 +560,8 @@
         }
 
         // Display current time
-        function updateClock() {
-            if (!isTimerRunning) {
+        function updateMagicalClock() {
+            if (!isQuestActive) {
                 const now = new Date();
                 display.textContent = now.toLocaleTimeString('en-GB', { hour12: false });
             }
@@ -569,77 +569,77 @@
 
         // Update clock every second when not timing
         setInterval(() => {
-            if (!isTimerRunning) {
-                updateClock();
+            if (!isQuestActive) {
+                updateMagicalClock();
             }
         }, 1000);
 
-        updateClock();
+        updateMagicalClock();
 
         // Format seconds to HH:MM:SS or MM:SS
-        function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
+        function enchantTimeRunes(heartbeats) {
+            const moons = Math.floor(heartbeats / 3600);
+            const suns = Math.floor((heartbeats % 3600) / 60);
+            const stars = heartbeats % 60;
 
-            if (hours > 0) {
-                return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            if (moons > 0) {
+                return `${String(moons).padStart(2, '0')}:${String(suns).padStart(2, '0')}:${String(stars).padStart(2, '0')}`;
             } else {
-                return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                return `${String(suns).padStart(2, '0')}:${String(stars).padStart(2, '0')}`;
             }
         }
 
         // Start timer
-        function startTimer(task) {
-            isTimerRunning = true;
-            remainingSeconds = defaultTimerSeconds;
-            taskDisplay.textContent = task;
-            statusEl.textContent = 'Focus time! 🍅';
+        function embarkOnQuest(heroicMission) {
+            isQuestActive = true;
+            remainingHeartbeats = defaultQuestHeartbeats;
+            taskDisplay.textContent = heroicMission;
+            statusEl.textContent = 'The hero begins their quest! ⚔️';
             instructions.style.display = 'none';
-            currentSessionStart = new Date();
+            currentAdventureBeginning = new Date();
 
-            display.textContent = formatTime(remainingSeconds);
+            display.textContent = enchantTimeRunes(remainingHeartbeats);
 
-            timerInterval = setInterval(() => {
-                remainingSeconds--;
-                display.textContent = formatTime(remainingSeconds);
+            questInterval = setInterval(() => {
+                remainingHeartbeats--;
+                display.textContent = enchantTimeRunes(remainingHeartbeats);
 
-                if (remainingSeconds <= 0) {
-                    clearInterval(timerInterval);
-                    timerComplete();
+                if (remainingHeartbeats <= 0) {
+                    clearInterval(questInterval);
+                    questVictory();
                 }
             }, 1000);
         }
 
         // Timer complete
-        function timerComplete() {
-            isTimerRunning = false;
-            const endTime = new Date();
+        function questVictory() {
+            isQuestActive = false;
+            const adventureConclusion = new Date();
 
             // Store session data temporarily
-            currentSessionData = {
+            currentAdventureScroll = {
                 task: taskDisplay.textContent,
-                startTime: currentSessionStart,
-                endTime: endTime,
+                startTime: currentAdventureBeginning,
+                endTime: adventureConclusion,
                 accomplishments: '',
                 productivity: null,
                 blockers: ''
             };
 
-            statusEl.textContent = 'Pomodoro complete! Great work! 🎉';
+            statusEl.textContent = 'Quest complete! The hero triumphs! 🏆';
             display.textContent = '00:00';
 
             // Show notification
             if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('Pomodoro Complete!', {
-                    body: 'Time for a break! You completed: ' + taskDisplay.textContent,
-                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">🍅</text></svg>'
+                new Notification('Quest Complete!', {
+                    body: 'The hero rests! You completed: ' + taskDisplay.textContent,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">⚔️</text></svg>'
                 });
             }
 
             // Show reflection modal after a brief delay
             setTimeout(() => {
-                showReflectionModal();
+                openChronicleScroll();
             }, 1500);
         }
 
@@ -656,10 +656,10 @@
             if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                 e.preventDefault();
 
-                if (!isTimerRunning) {
-                    showStartModal();
+                if (!isQuestActive) {
+                    summonQuestGiver();
                 } else if (!modifyModal.classList.contains('active')) {
-                    showModifyModal();
+                    consultTheOracle();
                 }
                 return;
             }
@@ -683,11 +683,11 @@
         taskInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const task = taskInput.value.trim();
+                const heroicMission = taskInput.value.trim();
 
-                if (task) {
+                if (heroicMission) {
                     modal.classList.remove('active');
-                    startTimer(task);
+                    embarkOnQuest(heroicMission);
                 }
             } else if (e.key === 'Escape') {
                 modal.classList.remove('active');
@@ -695,21 +695,21 @@
         });
 
         // Show start modal
-        function showStartModal() {
+        function summonQuestGiver() {
             modal.classList.add('active');
             taskInput.value = '';
             taskInput.focus();
         }
 
         // Show modify modal
-        function showModifyModal() {
-            const hours = Math.floor(remainingSeconds / 3600);
-            const minutes = Math.floor((remainingSeconds % 3600) / 60);
-            const seconds = remainingSeconds % 60;
+        function consultTheOracle() {
+            const moons = Math.floor(remainingHeartbeats / 3600);
+            const suns = Math.floor((remainingHeartbeats % 3600) / 60);
+            const stars = remainingHeartbeats % 60;
 
-            hoursInput.value = hours;
-            minutesInput.value = minutes;
-            secondsInput.value = seconds;
+            hoursInput.value = moons;
+            minutesInput.value = suns;
+            secondsInput.value = stars;
 
             modifyModal.classList.add('active');
             hoursInput.focus();
@@ -718,26 +718,26 @@
 
         // Change timer button
         continueBtn.addEventListener('click', () => {
-            const hours = parseInt(hoursInput.value) || 0;
-            const minutes = parseInt(minutesInput.value) || 0;
-            const seconds = parseInt(secondsInput.value) || 0;
+            const moons = parseInt(hoursInput.value) || 0;
+            const suns = parseInt(minutesInput.value) || 0;
+            const stars = parseInt(secondsInput.value) || 0;
 
-            const newTotalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+            const newDestiny = (moons * 3600) + (suns * 60) + stars;
 
-            if (newTotalSeconds > 0) {
-                remainingSeconds = newTotalSeconds;
+            if (newDestiny > 0) {
+                remainingHeartbeats = newDestiny;
                 modifyModal.classList.remove('active');
-                statusEl.textContent = `Timer changed to ${formatTime(remainingSeconds)}! 🍅`;
+                statusEl.textContent = `The Oracle has spoken! Quest adjusted to ${enchantTimeRunes(remainingHeartbeats)}! 🔮`;
             } else {
-                alert('Please enter a valid time greater than 0');
+                alert('The Oracle requires a valid prophecy greater than 0');
             }
         });
 
         // End timer early
         endBtn.addEventListener('click', () => {
-            clearInterval(timerInterval);
+            clearInterval(questInterval);
             modifyModal.classList.remove('active');
-            timerComplete();
+            questVictory();
         });
 
         // Cancel modify modal
@@ -791,42 +791,42 @@
 
         // Navigation button - toggle between main and calendar view
         navBtn.addEventListener('click', () => {
-            isCalendarView = !isCalendarView;
+            isChroniclesView = !isChroniclesView;
 
-            if (isCalendarView) {
+            if (isChroniclesView) {
                 mainView.classList.add('hidden');
                 calendarView.classList.add('active');
                 navBtn.textContent = '🏠';
-                renderSessions();
+                unfurlTheChronicles();
             } else {
                 mainView.classList.remove('hidden');
                 calendarView.classList.remove('active');
-                navBtn.textContent = '📅';
+                navBtn.textContent = '📜';
             }
         });
 
         // Render sessions list
-        function renderSessions() {
+        function unfurlTheChronicles() {
             sessionsList.innerHTML = '';
 
-            if (completedSessions.length === 0) {
-                sessionsList.innerHTML = '<div class="empty-state">No completed sessions yet. Start a Pomodoro to see it here!</div>';
+            if (completedAdventures.length === 0) {
+                sessionsList.innerHTML = '<div class="empty-state">No legendary tales yet. Embark on a quest to write your story!</div>';
                 return;
             }
 
-            const sortedSessions = [...completedSessions].sort((a, b) => b.startTime - a.startTime);
+            const epicSagas = [...completedAdventures].sort((a, b) => b.startTime - a.startTime);
 
-            sortedSessions.forEach(session => {
-                const sessionEl = document.createElement('div');
-                sessionEl.className = 'session-item';
+            epicSagas.forEach(legendaryTale => {
+                const sagaScroll = document.createElement('div');
+                sagaScroll.className = 'session-item';
 
-                const taskEl = document.createElement('div');
-                taskEl.className = 'session-task';
-                taskEl.textContent = session.task;
+                const questTitle = document.createElement('div');
+                questTitle.className = 'session-task';
+                questTitle.textContent = legendaryTale.task;
 
-                const timeEl = document.createElement('div');
-                timeEl.className = 'session-time';
-                const startStr = session.startTime.toLocaleString('en-GB', {
+                const journeyTime = document.createElement('div');
+                journeyTime.className = 'session-time';
+                const questBeginning = legendaryTale.startTime.toLocaleString('en-GB', {
                     hour12: false,
                     year: 'numeric',
                     month: 'short',
@@ -834,94 +834,94 @@
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                const endStr = session.endTime.toLocaleTimeString('en-GB', {
+                const questEnding = legendaryTale.endTime.toLocaleTimeString('en-GB', {
                     hour12: false,
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                timeEl.textContent = `${startStr} - ${endStr}`;
+                journeyTime.textContent = `${questBeginning} - ${questEnding}`;
 
-                sessionEl.appendChild(taskEl);
-                sessionEl.appendChild(timeEl);
+                sagaScroll.appendChild(questTitle);
+                sagaScroll.appendChild(journeyTime);
 
                 // Add reflection data if available
-                if (session.accomplishments || session.productivity || session.blockers) {
-                    const reflectionEl = document.createElement('div');
-                    reflectionEl.className = 'session-reflection';
+                if (legendaryTale.accomplishments || legendaryTale.productivity || legendaryTale.blockers) {
+                    const heroicChronicle = document.createElement('div');
+                    heroicChronicle.className = 'session-reflection';
 
-                    if (session.productivity) {
-                        const productivityEl = document.createElement('div');
-                        productivityEl.className = 'reflection-item';
-                        const emoji = session.productivity === 'happy' ? '😊' : session.productivity === 'meh' ? '😐' : '☹️';
-                        productivityEl.innerHTML = `<span class="reflection-label">Felt:</span> ${emoji}`;
-                        reflectionEl.appendChild(productivityEl);
+                    if (legendaryTale.productivity) {
+                        const heroSpirit = document.createElement('div');
+                        heroSpirit.className = 'reflection-item';
+                        const spiritEmoji = legendaryTale.productivity === 'happy' ? '😊' : legendaryTale.productivity === 'meh' ? '😐' : '☹️';
+                        heroSpirit.innerHTML = `<span class="reflection-label">Hero's Spirit:</span> ${spiritEmoji}`;
+                        heroicChronicle.appendChild(heroSpirit);
                     }
 
-                    if (session.accomplishments) {
-                        const accomplishmentsEl = document.createElement('div');
-                        accomplishmentsEl.className = 'reflection-item';
-                        accomplishmentsEl.innerHTML = `<span class="reflection-label">Accomplished:</span> ${session.accomplishments}`;
-                        reflectionEl.appendChild(accomplishmentsEl);
+                    if (legendaryTale.accomplishments) {
+                        const victories = document.createElement('div');
+                        victories.className = 'reflection-item';
+                        victories.innerHTML = `<span class="reflection-label">Victories:</span> ${legendaryTale.accomplishments}`;
+                        heroicChronicle.appendChild(victories);
                     }
 
-                    if (session.blockers) {
-                        const blockersEl = document.createElement('div');
-                        blockersEl.className = 'reflection-item';
-                        blockersEl.innerHTML = `<span class="reflection-label">Blockers:</span> ${session.blockers}`;
-                        reflectionEl.appendChild(blockersEl);
+                    if (legendaryTale.blockers) {
+                        const dragons = document.createElement('div');
+                        dragons.className = 'reflection-item';
+                        dragons.innerHTML = `<span class="reflection-label">Dragons Faced:</span> ${legendaryTale.blockers}`;
+                        heroicChronicle.appendChild(dragons);
                     }
 
-                    sessionEl.appendChild(reflectionEl);
+                    sagaScroll.appendChild(heroicChronicle);
                 }
 
-                sessionsList.appendChild(sessionEl);
+                sessionsList.appendChild(sagaScroll);
             });
         }
 
         // Calendar export button
         calendarExportBtn.addEventListener('click', () => {
-            if (completedSessions.length === 0) {
-                alert('No completed sessions to export!');
+            if (completedAdventures.length === 0) {
+                alert('No legendary quests to export to the royal archives!');
                 return;
             }
 
-            let csvContent = 'Subject,Start Date,Start Time,End Date,End Time,Description\n';
+            let ancientScroll = 'Subject,Start Date,Start Time,End Date,End Time,Description\n';
 
-            completedSessions.forEach(session => {
-                const startDate = session.startTime.toLocaleDateString('en-US');
-                const startTime = session.startTime.toLocaleTimeString('en-US', { hour12: false });
-                const endDate = session.endTime.toLocaleDateString('en-US');
-                const endTime = session.endTime.toLocaleTimeString('en-US', { hour12: false });
+            completedAdventures.forEach(epicTale => {
+                const dawnDate = epicTale.startTime.toLocaleDateString('en-US');
+                const dawnHour = epicTale.startTime.toLocaleTimeString('en-US', { hour12: false });
+                const duskDate = epicTale.endTime.toLocaleDateString('en-US');
+                const duskHour = epicTale.endTime.toLocaleTimeString('en-US', { hour12: false });
 
-                const taskName = session.task.replace(/"/g, '""');
+                const questName = epicTale.task.replace(/"/g, '""');
 
-                csvContent += `"${taskName}",${startDate},${startTime},${endDate},${endTime},Pomodoro session\n`;
+                ancientScroll += `"${questName}",${dawnDate},${dawnHour},${duskDate},${duskHour},Heroic Quest\n`;
             });
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
+            const magicalBlob = new Blob([ancientScroll], { type: 'text/csv;charset=utf-8;' });
+            const portalLink = document.createElement('a');
+            const mysticalUrl = URL.createObjectURL(magicalBlob);
 
-            link.setAttribute('href', url);
-            link.setAttribute('download', `pomodoro_sessions_${new Date().toISOString().split('T')[0]}.csv`);
-            link.style.visibility = 'hidden';
+            portalLink.setAttribute('href', mysticalUrl);
+            portalLink.setAttribute('download', `heroic_quests_${new Date().toISOString().split('T')[0]}.csv`);
+            portalLink.style.visibility = 'hidden';
 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            document.body.appendChild(portalLink);
+            portalLink.click();
+            document.body.removeChild(portalLink);
 
-            alert(`Exported ${completedSessions.length} session(s)! Import this CSV into Google Calendar.`);
+            alert(`Exported ${completedAdventures.length} heroic quest(s)! Import this ancient scroll into Google Calendar.`);
         });
 
         // Settings button
         settingsBtn.addEventListener('click', () => {
-            const hours = Math.floor(defaultTimerSeconds / 3600);
-            const minutes = Math.floor((defaultTimerSeconds % 3600) / 60);
-            const seconds = defaultTimerSeconds % 60;
+            const moons = Math.floor(defaultQuestHeartbeats / 3600);
+            const suns = Math.floor((defaultQuestHeartbeats % 3600) / 60);
+            const stars = defaultQuestHeartbeats % 60;
 
-            settingsHoursInput.value = hours;
-            settingsMinutesInput.value = minutes;
-            settingsSecondsInput.value = seconds;
+            settingsHoursInput.value = moons;
+            settingsMinutesInput.value = suns;
+            settingsSecondsInput.value = stars;
 
             settingsModal.classList.add('active');
             settingsHoursInput.focus();
@@ -930,18 +930,18 @@
 
         // Save settings
         settingsSaveBtn.addEventListener('click', () => {
-            const hours = parseInt(settingsHoursInput.value) || 0;
-            const minutes = parseInt(settingsMinutesInput.value) || 0;
-            const seconds = parseInt(settingsSecondsInput.value) || 0;
+            const moons = parseInt(settingsHoursInput.value) || 0;
+            const suns = parseInt(settingsMinutesInput.value) || 0;
+            const stars = parseInt(settingsSecondsInput.value) || 0;
 
-            const newDefaultSeconds = (hours * 3600) + (minutes * 60) + seconds;
+            const newDestinyLength = (moons * 3600) + (suns * 60) + stars;
 
-            if (newDefaultSeconds > 0) {
-                defaultTimerSeconds = newDefaultSeconds;
+            if (newDestinyLength > 0) {
+                defaultQuestHeartbeats = newDestinyLength;
                 settingsModal.classList.remove('active');
-                alert(`Default timer set to ${formatTime(defaultTimerSeconds)}!`);
+                alert(`Default quest duration set to ${enchantTimeRunes(defaultQuestHeartbeats)}!`);
             } else {
-                alert('Please enter a valid time greater than 0');
+                alert('Please enter a valid quest duration greater than 0');
             }
         });
 
@@ -1008,7 +1008,7 @@
         setupSettingsTimeInputNavigation();
 
         // Show reflection modal
-        function showReflectionModal() {
+        function openChronicleScroll() {
             accomplishmentsInput.value = '';
             blockersInput.value = '';
             productivityBtns.forEach(btn => btn.classList.remove('selected'));
@@ -1021,27 +1021,27 @@
             btn.addEventListener('click', () => {
                 productivityBtns.forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
-                currentSessionData.productivity = btn.dataset.feeling;
+                currentAdventureScroll.productivity = btn.dataset.feeling;
             });
         });
 
         // Save reflection
         reflectionSaveBtn.addEventListener('click', () => {
-            saveReflection();
+            inscribeIntoLegends();
         });
 
         // Skip reflection
         reflectionSkipBtn.addEventListener('click', () => {
-            saveReflection();
+            inscribeIntoLegends();
         });
 
         // Save reflection and complete session
-        function saveReflection() {
-            currentSessionData.accomplishments = accomplishmentsInput.value.trim();
-            currentSessionData.blockers = blockersInput.value.trim();
+        function inscribeIntoLegends() {
+            currentAdventureScroll.accomplishments = accomplishmentsInput.value.trim();
+            currentAdventureScroll.blockers = blockersInput.value.trim();
 
-            completedSessions.push(currentSessionData);
-            currentSessionData = null;
+            completedAdventures.push(currentAdventureScroll);
+            currentAdventureScroll = null;
 
             reflectionModal.classList.remove('active');
 
@@ -1049,7 +1049,7 @@
             taskDisplay.textContent = '';
             statusEl.textContent = '';
             instructions.style.display = 'block';
-            updateClock();
+            updateMagicalClock();
         }
 
         // Handle reflection modal keyboard shortcuts
